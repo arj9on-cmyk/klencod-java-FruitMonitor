@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎯 حفلة الفاكهة — مباشر</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Cairo',Tahoma,sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;min-height:100vh;padding:14px}
+.wrap{max-width:1100px;margin:0 auto}
+.hdr{text-align:center;padding:20px;background:rgba(138,43,226,.35);border:2px solid rgba(255,215,0,.4);border-radius:20px;margin-bottom:16px}
+.hdr h1{font-size:clamp(20px,4vw,30px);background:linear-gradient(90deg,#ffd700,#ff6b9d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.live{display:inline-flex;align-items:center;gap:6px;color:#4caf50;font-weight:700;font-size:13px;margin-top:6px}
+.live i{width:9px;height:9px;border-radius:50%;background:#4caf50;box-shadow:0 0 10px #4caf50;animation:p 1.5s infinite}
+@keyframes p{50%{opacity:.4}}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:rgba(0,0,0,.4);border:1px solid rgba(255,215,0,.3);border-radius:14px;padding:14px;text-align:center}
+.stat b{display:block;font-size:22px;color:#ffd700}
+.stat small{font-size:11px;color:#d4c5f0}
+.card{background:rgba(20,10,40,.75);border:2px solid rgba(255,255,255,.1);border-radius:16px;padding:18px;margin-bottom:14px}
+.card h3{color:#ffd700;font-size:16px;margin-bottom:12px}
+.bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.bar .e{width:30px;font-size:22px}.bar .l{width:70px;font-weight:700}
+.bar .t{flex:1;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden}
+.bar .f{height:100%;border-radius:5px}
+.bar .v{width:60px;text-align:left;color:#ffd700;font-weight:800;font-size:12px}
+.rec{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(255,140,0,.12));border:3px solid #ffd700;border-radius:16px;padding:20px;text-align:center}
+.rec .big{font-size:60px;animation:b 1.5s infinite}
+@keyframes b{50%{transform:translateY(-8px)}}
+.rec h2{color:#ffd700;font-size:22px}
+.wk{background:rgba(0,0,0,.4);border:2px solid rgba(255,215,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wk.hot{border-color:#4caf50;background:linear-gradient(135deg,rgba(76,175,80,.18),rgba(0,0,0,.4))}
+.badge{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a0b2e;padding:7px 12px;border-radius:9px;font-weight:900;min-width:64px;text-align:center}
+.rp{background:#4caf50;color:#fff;padding:5px 10px;border-radius:7px;font-weight:900;font-size:12px}
+.empty{color:#8a7aa8;text-align:center;padding:24px}
+.log{max-height:300px;overflow-y:auto;background:rgba(0,0,0,.3);border-radius:10px;padding:10px}
+.log-item{display:flex;gap:10px;padding:8px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+.log-item:last-child{border:none}
+.log-item .rn{background:#ffd700;color:#1a0b2e;padding:4px 10px;border-radius:6px;font-weight:900;min-width:50px;text-align:center}
+.log-item .fr{font-size:20px}
+.log-item .dt{color:#d4c5f0;font-size:11px}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body><div class="wrap">
+<div class="hdr">
+  <h1>🎯 حفلة الفاكهة — مباشر</h1>
+  <div class="live"><i></i> المراقب يعمل — يُحدّث كل 3 ثوانٍ</div>
+</div>
+<div class="grid">
+  <div class="stat"><b id="sTotal">0</b><small>إجمالي</small></div>
+  <div class="stat"><b id="sToday">0</b><small>اليوم</small></div>
+  <div class="stat"><b id="sWeek">0</b><small>الأسبوع</small></div>
+  <div class="stat"><b id="sRepeat">0</b><small>تكرار</small></div>
+</div>
+<div class="card"><h3>🎯 توصية الجولة القادمة</h3><div id="rec"></div></div>
+<div class="card"><h3>🔥 تكرار الفواكه (آخر 7 أيام)</h3><div id="freq"></div></div>
+<div class="card"><h3>💎 جولات متكررة بنفس الرقم (3+ أيام)</h3><div id="weekly"></div></div>
+<div class="card"><h3>📜 آخر الجولات</h3><div class="log" id="log"></div></div>
+</div>
+<script>
+const F={orange:{e:'🍊',n:'برتقال',m:5},lemon:{e:'🍋',n:'ليمون',m:5},apple:{e:'🍎',n:'تفاح',m:5},
+cherry:{e:'🍒',n:'كرز',m:45},banana:{e:'🍌',n:'موز',m:5},avocado:{e:'🥑',n:'أفوكادو',m:25},
+watermelon:{e:'🍉',n:'بطيخ',m:15},grape:{e:'🍇',n:'عنب',m:10}};
+const today=()=>new Date().toISOString().slice(0,10);
+
+function loadData() {
+    try {
+        if (window.AndroidBridge) {
+            const json = AndroidBridge.getJson();
+            const d = JSON.parse(json);
+            render(d);
+        } else {
+            document.getElementById('rec').innerHTML = '<div class="empty">⚠️ AndroidBridge غير متاح</div>';
+        }
+    } catch(e) {
+        console.error(e);
+        document.getElementById('rec').innerHTML = '<div class="empty">⚠️ خطأ في قراءة البيانات</div>';
+    }
+}
+
+function render(d){
+  const t=today(), week=new Date(Date.now()-6*864e5).toISOString().slice(0,10);
+  const todayR=d.filter(r=>r.date===t), weekR=d.filter(r=>r.date>=week);
+  document.getElementById('sTotal').textContent=d.length;
+  document.getElementById('sToday').textContent=todayR.length;
+  document.getElementById('sWeek').textContent=weekR.length;
+
+  const map={};
+  weekR.forEach(r=>{const k=r.roundNum+'-'+r.winner;map[k]=(map[k]||0)+1;});
+  document.getElementById('sRepeat').textContent=Object.values(map).filter(v=>v>=2).length;
+
+  // توصية: أقل فاكهة ظهوراً اليوم
+  const f={}; Object.keys(F).forEach(k=>f[k]=0);
+  todayR.forEach(r=>f[r.winner]++);
+  const sorted=Object.entries(f).sort((a,b)=>a[1]-b[1]);
+  const [rid,cnt]=sorted[0];
+  document.getElementById('rec').innerHTML= todayR.length<5
+    ? '<div class="empty">⏳ انتظر 5 جولات على الأقل...</div>'
+    : `<div class="rec"><div class="big">${F[rid].e}</div><h2>${F[rid].n}</h2>
+       <p>ظهرت ${cnt}× فقط من ${todayR.length} — الأرجح ظهورها قريباً</p>
+       <p style="margin-top:6px;font-size:12px;color:#ffd700">مضاعف: ×${F[rid].m}</p></div>`;
+
+  // تكرار أسبوعي
+  const wf={}; weekR.forEach(r=>wf[r.winner]=(wf[r.winner]||0)+1);
+  const mx=Math.max(...Object.values(wf),1);
+  document.getElementById('freq').innerHTML=Object.keys(F).map(k=>{
+    const v=wf[k]||0;return `<div class="bar"><span class="e">${F[k].e}</span><span class="l">${F[k].n}</span>
+    <span class="t"><span class="f" style="width:${v/mx*100}%;background:#ffd700"></span></span>
+    <span class="v">${v}× (${weekR.length?(v/weekR.length*100).toFixed(0):0}%)</span></div>`;}).join('');
+
+  // جولات متكررة
+  const byRound={};
+  weekR.forEach(r=>{(byRound[r.roundNum]=byRound[r.roundNum]||[]).push(r);});
+  const strong=[];
+  Object.entries(byRound).forEach(([num,rs])=>{
+    const c={};rs.forEach(r=>c[r.winner]=(c[r.winner]||0)+1);
+    const [w,n]=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];
+    if(n>=3)strong.push({num:+num,w,n,total:rs.length,dates:rs.map(r=>r.date)});
+  });
+  strong.sort((a,b)=>b.n-a.n);
+  document.getElementById('weekly').innerHTML= strong.length?
+    strong.slice(0,20).map(s=>`<div class="wk hot"><span class="badge">جولة ${s.num}</span>
+    <span style="flex:1;font-weight:800;color:#4caf50">${F[s.w].e} ${F[s.w].n}</span>
+    <span class="rp">تكرر ${s.n}× من ${s.total}</span></div>`).join('')
+    : '<div class="empty">لا تكرار 3+ بعد — اترك المراقب يعمل أياماً</div>';
+
+  // آخر الجولات
+  const last=[...d].sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,30);
+  document.getElementById('log').innerHTML= last.map(r=>`
+    <div class="log-item">
+      <span class="rn">#${r.roundNum}</span>
+      <span class="fr">${F[r.winner]?.e||'?'}</span>
+      <span style="flex:1;font-weight:700">${F[r.winner]?.n||r.winner}</span>
+      <span class="dt">${r.date} · ${new Date(r.time).toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</span>
+    </div>`).join('') || '<div class="empty">لا بيانات بعد</div>';
+}
+
+// تحميل أولي
+loadData();
+// تحديث كل 3 ثوانٍ
+setInterval(loadData, 3000);
+</script>
+</body>
+</html>

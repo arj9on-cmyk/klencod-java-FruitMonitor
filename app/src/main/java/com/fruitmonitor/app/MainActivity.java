@@ -1,5 +1,6 @@
 package com.fruitmonitor.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -8,9 +9,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     static WebView webView;
     static FruitService.DBHelper db;
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         // تهيئة قاعدة البيانات
         db = new FruitService.DBHelper(this);
 
-        // إعداد WebView لعرض لوحة التحكم
+        // إعداد WebView
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient());
         
@@ -39,10 +39,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }, "AndroidBridge");
 
-        // تحميل ملف HTML من مجلد assets
+        // تحميل Dashboard
         webView.loadUrl("file:///android_asset/dashboard.html");
 
-        // زر الذهاب لإعدادات إمكانية الوصول
+        // زر تفعيل الخدمة
         btn.setOnClickListener(v -> {
             startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
         });
@@ -55,13 +55,11 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         TextView status = findViewById(R.id.statusText);
         updateStatus(status);
-        // تحديث البيانات عند العودة للتطبيق
         if (webView != null) {
             webView.post(() -> webView.loadUrl("javascript:load()"));
         }
     }
 
-    // دالة للتحقق مما إذا كانت الخدمة مفعلة
     private void updateStatus(TextView tv) {
         String serviceName = getPackageName() + "/" + FruitService.class.getName();
         String enabled = Settings.Secure.getString(
@@ -71,14 +69,13 @@ public class MainActivity extends AppCompatActivity {
         
         if (isActive) {
             tv.setText("✅ المراقب يعمل ويقرأ الشاشة");
-            tv.setTextColor(0xFF4CAF50); // أخضر
+            tv.setTextColor(0xFF4CAF50);
         } else {
             tv.setText("⚠️ اضغط الزر أدناه لتفعيل خدمة المراقبة");
-            tv.setTextColor(0xFFFF9800); // برتقالي
+            tv.setTextColor(0xFFFF9800);
         }
     }
 
-    // دالة يستدعيها الـ Service لتحديث الشاشة تلقائياً عند تسجيل جولة جديدة
     public static void refreshDashboard() {
         if (webView != null) {
             webView.post(() -> webView.loadUrl("javascript:load()"));
